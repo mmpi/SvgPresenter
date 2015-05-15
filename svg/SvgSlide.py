@@ -7,6 +7,7 @@ from buffer.FileBuffer import FileBuffer
 
 from fileConverter.BufferedSvgToPng import BufferedSvgToPng
 from fileConverter.BufferedSvgToPdf import BufferedSvgToPdf
+from fileConverter.BufferedPdfToSvg import BufferedPdfToSvg
 
 class SvgSlide:
     @staticmethod
@@ -51,12 +52,14 @@ class SvgSlide:
         self.buffer = buffer
         self.rawSvgBuffer = self.buffer.subBuffer("rawSvg")
         self.xmlBuffer = self.buffer.subBuffer("xml")
-        self.pngBuffer = self.buffer.subBuffer("png")
         self.pdfBuffer = self.buffer.subBuffer("pdf")
+        self.svgBuffer = self.buffer.subBuffer("svg")
+        self.pngBuffer = self.buffer.subBuffer("png")
 
         # converters
+        self.rawSvgToPdf = BufferedSvgToPdf(self.rawSvgBuffer, self.pdfBuffer)
+        self.pdfToSvg = BufferedPdfToSvg(self.pdfBuffer, self.svgBuffer)
         self.svgToPng = BufferedSvgToPng(self.rawSvgBuffer, self.pngBuffer)
-        self.svgToPdf = BufferedSvgToPdf(self.rawSvgBuffer, self.pdfBuffer)
         
         # the following will be set by the static factory functions
         self.hash = None
@@ -128,7 +131,11 @@ class SvgSlide:
                 self.movieData.append(d)
                 
     def providePdfFile(self, log=None):
-        return self.svgToPdf.convertForHash(self.hash, log)
+        return self.rawSvgToPdf.convertForHash(self.hash, log)
+
+    def provideSvgFile(self, log=None):
+        self.rawSvgToPdf.convertForHash(self.hash, log)
+        return self.pdfToSvg.convertForHash(self.hash, log)
 
     def provideRasterImage(self, log=None):
         return self.svgToPng.convertForHash(self.hash, log)

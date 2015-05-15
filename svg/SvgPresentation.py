@@ -153,6 +153,7 @@ class SvgPresentation:
         if pdfPath is None:
             basePath, extension = os.path.splitext(self.svgPath)
             pdfPath = basePath + ".pdf"
+            
         self.log.write("Exporting presentation as %s..."%pdfPath)
         subLog = self.log.subLayer()
         
@@ -164,4 +165,4 @@ class SvgPresentation:
         subprocess.check_output(["pdftk"] + slidePdfPaths + ["cat", "output", pdfPath])
         
         self.log.write("Done.")        
-        
+        return pdfPath

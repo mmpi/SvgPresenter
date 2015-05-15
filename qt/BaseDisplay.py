@@ -3,11 +3,11 @@ from PyQt4 import QtGui
 
 
 class BaseDisplay(QtGui.QMainWindow):
-    def __init__(self, presentation):
+    def __init__(self, presentationController):
         QtGui.QMainWindow.__init__(self)
         
-        self.presentation = presentation
-        self.presentation.closeDown.connect(self.close)
+        self.presentationController = presentationController
+        self.presentationController.closeDown.connect(self.close)
 
         palette = QtGui.QPalette()
         palette.setColor(QtGui.QPalette.Background, QtCore.Qt.black)
@@ -17,15 +17,15 @@ class BaseDisplay(QtGui.QMainWindow):
     
     def keyPressEvent(self, event):
         if(event.key() in [QtCore.Qt.Key_Right, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageDown]):
-            self.presentation.forward()
+            self.presentationController.forward()
         elif(event.key() in [QtCore.Qt.Key_Left, QtCore.Qt.Key_Up, QtCore.Qt.Key_PageUp]):
-            self.presentation.backward()
+            self.presentationController.backward()
         elif(event.key() in [QtCore.Qt.Key_Home]):
-            self.presentation.first()
+            self.presentationController.first()
         elif(event.key() in [QtCore.Qt.Key_End]):
-            self.presentation.last()
+            self.presentationController.last()
         elif(event.key()==QtCore.Qt.Key_Escape):
-            self.presentation.close()
+            self.presentationController.close()
         else:
 #             print event.key()
             return QtGui.QMainWindow.keyPressEvent(self, event)

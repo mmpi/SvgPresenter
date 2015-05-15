@@ -5,12 +5,12 @@ from BaseDisplay import BaseDisplay
 from SlideArea import SlideArea
 
 class AudienceDisplay(BaseDisplay):
-    def __init__(self, presentation):
-        BaseDisplay.__init__(self, presentation)
+    def __init__(self, presentationController):
+        BaseDisplay.__init__(self, presentationController)
         
-        self.slideArea = SlideArea(self, self.presentation)
-        self.presentation.slideChange.connect(self.slideArea.showNewSlide)
-        self.presentation.startMovie.connect(self.slideArea.startMovie)
+        self.slideArea = SlideArea(self, self.presentationController)
+        self.presentationController.slideChange.connect(self.slideArea.showNewSlide)
+        self.presentationController.startMovie.connect(self.slideArea.startMovie)
 
         self.setMinimumSize(640, 480)
     
