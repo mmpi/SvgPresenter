@@ -1,9 +1,7 @@
 from PyQt4 import QtCore, QtGui
 
 from log.Log import Log
-from drawer.RasterImageDrawer import RasterImageDrawer
-from drawer.SvgDrawer import SvgDrawer
-from drawer.PdfDrawer import PdfDrawer
+from drawer import DrawerGenerators
 from movie.MovieData import MovieData
 
 class PresentationController(QtCore.QObject):
@@ -11,26 +9,22 @@ class PresentationController(QtCore.QObject):
     startMovie = QtCore.pyqtSignal()
     closeDown = QtCore.pyqtSignal()
                
-    def __init__(self, presentation):
+    def __init__(self, presentation, mode):
         QtCore.QObject.__init__(self)
         self.presentation = presentation
         self.slideSize = QtCore.QSize(presentation.width, presentation.height)
 
         self.log = Log()
         self.numSlides = self.presentation.numberOfSlides()
-        self.slideDrawers = self.prepareSlideDrawers()
+        self.slideDrawers = self.prepareSlideDrawers(mode)
         self.movieData = self.prepareMovieData()
         self.setSlideIndex(0)
 
-    def prepareSlideDrawers(self):
+    def prepareSlideDrawers(self, mode):
         self.log.write("Preparing slide drawers...")
         subLog = self.log.subLayer()
         slideDrawers = []
-        Mode = "raster"
-        DrawerGenerators = {"raster": lambda slide, log: RasterImageDrawer(slide.provideRasterImage(log)),
-                            "svg":  lambda slide, log: SvgDrawer(slide.provideSvgFile(log)),
-                            "pdf":  lambda slide, log: PdfDrawer(slide.providePdfFile(log)),}
-        drawerGenerator = DrawerGenerators[Mode]
+        drawerGenerator = DrawerGenerators[mode]
         for slide in self.presentation:
             slideDrawers.append(drawerGenerator(slide, subLog))
         self.log.write("Done.")

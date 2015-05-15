@@ -22,7 +22,7 @@ else:
     presentation.exportAsPdf()    
         
     app = QtGui.QApplication(sys.argv)
-    pc = PresentationController(presentation, "raster")
+    pc = PresentationController(presentation, "pdf")
     ad1 = AudienceDisplay(pc)
     ad1.show()
     # ad2 = AudienceDisplay(presentation)

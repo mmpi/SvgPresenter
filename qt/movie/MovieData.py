@@ -2,7 +2,6 @@ from PyQt4 import QtCore, QtGui
 import vlc.vlc as vlc
 
 class MovieData:
-    print "test"
     libvlc = vlc.Instance(["--no-audio","--no-xlib"])
 
     def __init__(self, dict):
