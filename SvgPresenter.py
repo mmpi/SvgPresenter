@@ -18,8 +18,8 @@ else:
         presentation.cleanUp()
         sys.exit(1)
     
-#     # create pdf
-#     createPdf(svgLoader)    
+    # create pdf
+    presentation.exportAsPdf()    
         
     app = QtGui.QApplication(sys.argv)
     pc = PresentationController(presentation)

@@ -4,7 +4,9 @@ from log.Log import Log
 from svg.XmlNamespaces import etree, NSS
 import svg.SvgManipulations as SvgManipulations
 from buffer.FileBuffer import FileBuffer
+
 from fileConverter.BufferedSvgToPng import BufferedSvgToPng
+from fileConverter.BufferedSvgToPdf import BufferedSvgToPdf
 
 class SvgSlide:
     @staticmethod
@@ -50,9 +52,11 @@ class SvgSlide:
         self.rawSvgBuffer = self.buffer.subBuffer("rawSvg")
         self.xmlBuffer = self.buffer.subBuffer("xml")
         self.pngBuffer = self.buffer.subBuffer("png")
+        self.pdfBuffer = self.buffer.subBuffer("pdf")
 
         # converters
         self.svgToPng = BufferedSvgToPng(self.rawSvgBuffer, self.pngBuffer)
+        self.svgToPdf = BufferedSvgToPdf(self.rawSvgBuffer, self.pdfBuffer)
         
         # the following will be set by the static factory functions
         self.hash = None
@@ -123,6 +127,9 @@ class SvgSlide:
                     d[key] = e.attrib[key] == "True"
                 self.movieData.append(d)
                 
+    def providePdfFile(self, log=None):
+        return self.svgToPdf.convertForHash(self.hash, log)
+
     def provideRasterImage(self, log=None):
         return self.svgToPng.convertForHash(self.hash, log)
     
