@@ -1,8 +1,10 @@
 from PyQt4 import QtCore, QtGui
 import vlc.vlc as vlc
 
+from MovieData import MovieData
+
 class MovieWidget(QtGui.QLabel):
-    def __init__(self, parent, movieData, mediaPlayer):
+    def __init__(self, parent, movieData):
         QtGui.QWidget.__init__(self, parent)
         
         palette = QtGui.QPalette()
@@ -10,17 +12,11 @@ class MovieWidget(QtGui.QLabel):
         self.setPalette(palette)
         self.setAutoFillBackground(True)
         
-        PngBase64 = "data:image/png;base64,"
-        imageData = movieData["image"]
-        if imageData.startswith(PngBase64):
-            byteArray = QtCore.QByteArray.fromBase64(imageData[len(PngBase64):])
-            self.pixmap = QtGui.QPixmap()
-            self.pixmap.loadFromData(byteArray)
-
         self.data = movieData
-        self.player = mediaPlayer
-        self.player.set_media(self.data["media"])
-        self.player.video_set_aspect_ratio("%d:%d"%(self.data["width"],self.data["height"]))
+        self.player = MovieData.libvlc.media_player_new()
+
+        self.player.set_media(self.data.media)
+        self.player.video_set_aspect_ratio(self.data.aspectRatio())
         self.eventManager = self.player.event_manager()
         self.eventManager.event_attach(vlc.EventType.MediaPlayerEndReached, self.stopped, 1)
         self.eventManager.event_attach(vlc.EventType.MediaPlayerStopped, self.stopped, 1)
@@ -36,8 +32,8 @@ class MovieWidget(QtGui.QLabel):
         self.player.stop()
         
     def updateGeometry(self, factor):
-        self.setGeometry(factor*self.data["x"], factor*self.data["y"], factor*self.data["width"], factor*self.data["height"])
-        self.setPixmap(self.pixmap.scaled(self.size(), QtCore.Qt.KeepAspectRatio))
+        self.setGeometry(self.data.scaledRectangle(factor))
+        self.setPixmap(self.data.pixmap.scaled(self.size(), QtCore.Qt.KeepAspectRatio))
 
     @vlc.callbackmethod
     def stopped(self, *args, **kwargs):

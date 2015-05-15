@@ -1,10 +1,10 @@
 from PyQt4 import QtCore, QtGui
-import vlc.vlc as vlc
 
 from log.Log import Log
 from drawer.RasterImageDrawer import RasterImageDrawer
 from drawer.SvgDrawer import SvgDrawer
 from drawer.PdfDrawer import PdfDrawer
+from movie.MovieData import MovieData
 
 class PresentationController(QtCore.QObject):
     slideChange = QtCore.pyqtSignal()
@@ -17,10 +17,9 @@ class PresentationController(QtCore.QObject):
         self.slideSize = QtCore.QSize(presentation.width, presentation.height)
 
         self.log = Log()
-        self.libvlc = vlc.Instance(["--no-audio","--no-xlib"])
-        
         self.numSlides = self.presentation.numberOfSlides()
         self.slideDrawers = self.prepareSlideDrawers()
+        self.movieData = self.prepareMovieData()
         self.setSlideIndex(0)
 
     def prepareSlideDrawers(self):
@@ -37,6 +36,17 @@ class PresentationController(QtCore.QObject):
         self.log.write("Done.")
         return slideDrawers
 
+    def prepareMovieData(self):
+        self.log.write("Preparing movie data...")
+        movieDataForAllSlides = []
+        for slide in self.presentation:
+            movieDataForCurrentSlide = []
+            for i in xrange(slide.numberOfMovies()):
+                movieDataForCurrentSlide.append(MovieData(slide.dataForMovie(i)))
+            movieDataForAllSlides.append(movieDataForCurrentSlide)
+        self.log.write("Done.")
+        return movieDataForAllSlides
+
     def drawSlide(self, painter):
         if self.slideIndex < self.numSlides:
             return self.slideDrawers[self.slideIndex](painter)
@@ -45,15 +55,12 @@ class PresentationController(QtCore.QObject):
         self.slideIndex = index
         if self.slideIndex < self.numSlides:
             self.slide = self.presentation.slide(self.slideIndex)
+            self.currentMovieData = self.movieData[index]
         self.movieOnSlide = -1
-        self.currentMovieData = None
         self.slideChange.emit()
 
     def getCurrentMovieData(self):
-        return self.currentMovieData
-    
-    def createMediaPlayer(self):
-        return self.libvlc.media_player_new()
+        return self.currentMovieData[self.movieOnSlide]
     
     def first(self):
         self.setSlideIndex(0)
@@ -66,13 +73,6 @@ class PresentationController(QtCore.QObject):
             # not yet all movies shown?
             self.movieOnSlide += 1
             if self.movieOnSlide < self.slide.numberOfMovies():
-                self.currentMovieData = self.slide.dataForMovie(self.movieOnSlide)
-                
-                media = self.libvlc.media_new(unicode(self.currentMovieData["path"]))
-                if self.currentMovieData["loop"]:
-                    media.add_option("input-repeat=-1") # repeat
-                self.currentMovieData["media"] = media
-    
                 self.startMovie.emit()
             else:
                 self.setSlideIndex(self.slideIndex + 1)

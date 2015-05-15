@@ -1,7 +1,7 @@
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 
-from MovieWidget import MovieWidget
+from movie.MovieWidget import MovieWidget
 
 class SlideArea(QtGui.QLabel):
     resized = QtCore.pyqtSignal('float')
@@ -47,12 +47,8 @@ class SlideArea(QtGui.QLabel):
         painter.end()
 
     def startMovie(self):
-        movieData = self.presentationController.getCurrentMovieData()
-        if movieData is None:
-            return
-        mediaPlayer = self.presentationController.createMediaPlayer()
-        widget = MovieWidget(self, movieData, mediaPlayer)
-        widget.updateGeometry(self.factor)
+        widget = MovieWidget(self, self.presentationController.getCurrentMovieData())
         self.resized.connect(widget.updateGeometry)
         self.movieWidgets.append(widget)
+        widget.updateGeometry(self.factor)
         widget.start()
