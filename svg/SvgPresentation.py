@@ -1,5 +1,6 @@
 import os.path
 
+from log.Log import Log
 from buffer.FileBuffer import FileBuffer
 from svg.XmlNamespaces import etree, NSS
 import svg.SvgManipulations as SvgManipulations
@@ -13,15 +14,16 @@ class SvgPresentation:
         return FileBuffer(os.path.join(baseFolderPath, "SvgPresentation-"+baseFileName))
     
     def __init__(self, svgPath):
+        self.log = Log()
         self.buffer = SvgPresentation.createBufferForSvgFile(svgPath)
         self.slideBuffer = self.buffer.subBuffer("slides")
-
-        print "Reading %s..."%svgPath
+        
+        self.log.write("Reading %s..."%svgPath)
         file = open(svgPath, 'r')
         data = file.read()
         file.close()
         hash = FileBuffer.hashFromData(data)        
-        print "Done."
+#         self.log.write("Done.")
 
         xmlPath = self.buffer.useFileWithHash(hash)
         if xmlPath is None:
@@ -36,6 +38,9 @@ class SvgPresentation:
 
     def reset(self):
         self.slides = []
+        
+    def __iter__(self):
+        return self.slides.__iter__()
     
     def cleanUp(self):
         self.buffer.cleanUp()
@@ -44,7 +49,7 @@ class SvgPresentation:
         self.reset()
         
         # parse data
-        print "Parsing..."
+        self.log.write("Parsing...")
 #         try:
         tree = etree.ElementTree(etree.fromstring(data))
 #         except:
@@ -52,13 +57,13 @@ class SvgPresentation:
 #             import xml.etree.ElementTree as etree
 #             tree = etree.ElementTree(etree.fromstring(data))
         data = None
-        print "Done."
+#         self.log.write("Done.")
 
         # look for layers and slides
-        print "Looking for layers..."
+        self.log.write("Looking for layers...")
         root = tree.getroot()
         layers = SvgManipulations.extractAllLayers(root)
-        print "%d layers found."%len(layers)
+        self.log.write("%d layers found."%len(layers))
 
         # remove unneeded data (for a higher probability of hashs being equal)
         CopyKeys = ["id", "pagecolor", "{%s}pageopacity"%NSS["inkscape"]]
@@ -77,7 +82,7 @@ class SvgPresentation:
 #         tree.write(svgPath+"-debug.svg", encoding="UTF-8", xml_declaration=True)
 
         # create slides
-        print "Creating slides..."
+        self.log.write("Creating slides...")
         for layerIndex, layer in enumerate(layers):
             # only loop over slides
             if SvgManipulations.isBackground(layer):
@@ -113,9 +118,9 @@ class SvgPresentation:
 #             hash, dummy = self.plainSvgFiles.hashAndOutput(svgTree.tostring(svgTree.getroot(), encoding="utf8"))
             
             # new slide into presentation structure
-            slide = SvgSlide.createFromSvgRootElement(self.slideBuffer, newSvgRoot)
+            slide = SvgSlide.createFromSvgRootElement(self.log.subLayer(), self.slideBuffer, newSvgRoot)
             self.slides.append(slide)
-        print "Done."
+        self.log.write("Done.")
         return True
     
     def loadFromXmlFile(self, path):

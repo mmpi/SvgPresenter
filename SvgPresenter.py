@@ -21,14 +21,14 @@ else:
 #     # create pdf
 #     createPdf(svgLoader)    
         
-#     app = QtGui.QApplication(sys.argv)
-#     pc = PresentationController(presentation)
-#     ad1 = AudienceDisplay(pc)
-#     ad1.show()
-#     # ad2 = AudienceDisplay(presentation)
-#     # ad2.show()
-#     # ad.showFullScreen()
-#     
-#     ret = app.exec_()
-#     presentation.cleanUp()
-#     sys.exit(ret)
+    app = QtGui.QApplication(sys.argv)
+    pc = PresentationController(presentation)
+    ad1 = AudienceDisplay(pc)
+    ad1.show()
+    # ad2 = AudienceDisplay(presentation)
+    # ad2.show()
+    # ad.showFullScreen()
+     
+    ret = app.exec_()
+    presentation.cleanUp()
+    sys.exit(ret)

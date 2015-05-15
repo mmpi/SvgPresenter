@@ -1,11 +1,12 @@
+from log.Log import Log
 from svg.XmlNamespaces import etree, NSS
 from buffer.FileBuffer import FileBuffer
-
+from fileConverter.BufferedSvgToPng import BufferedSvgToPng
 
 class SvgSlide:
     @staticmethod
-    def createFromSvgRootElement(buffer, svgRoot):
-        slide = SvgSlide(buffer)
+    def createFromSvgRootElement(log, buffer, svgRoot):
+        slide = SvgSlide(log, buffer)
 
         data = etree.tostring(svgRoot, encoding='ascii')
         slide.hash = FileBuffer.hashFromData(data)
@@ -24,7 +25,7 @@ class SvgSlide:
         
     @staticmethod
     def createFromPresentationXmlElement(buffer, element):
-        slide = SvgSlide(buffer)
+        slide = SvgSlide(Log(), buffer)
         slide.hash = element.attrib["hash"]
         xmlpath =  slide.xmlBuffer.useFileWithHash(slide.hash)
         if xmlpath is None:
@@ -38,15 +39,28 @@ class SvgSlide:
         slide.attrib["hash"] = self.hash
         return slide
 
-    def __init__(self, buffer):
+    def __init__(self, log, buffer):
+        self.log = log
+        
+        # buffers
         self.buffer = buffer
-        self.svgBuffer = self.buffer.subBuffer("rawSvg")
+        self.rawSvgBuffer = self.buffer.subBuffer("rawSvg")
         self.xmlBuffer = self.buffer.subBuffer("xml")
+        self.pngBuffer = self.buffer.subBuffer("png")
+
+        # converters
+        self.svgToPng = BufferedSvgToPng(self.rawSvgBuffer, self.pngBuffer)
+        
+        # the following will be set by the static factory functions
+        self.hash = None
+        self.movieData = []
         
     def loadFromSvgRootElement(self, svgRoot):
-        print "| Loading slide from svg data..."
+        self.log.write("Loading slide from svg data...")
+        subLog = self.log.subLayer()
+        
         # TODO: this should actually be done by a SvgSlideLayer class
-        svgPath = self.svgBuffer.registerAndUseFileWithHash(self.hash, ".svg")
+        svgPath = self.rawSvgBuffer.registerAndUseFileWithHash(self.hash, ".svg")
         etree.ElementTree(svgRoot).write(svgPath, encoding="UTF-8", xml_declaration=True)
         
         # movies
@@ -65,7 +79,7 @@ class SvgSlide:
             d["width"] = float(movie.get("width"))
             d["height"] = float(movie.get("height"))
             self.movieData.append(d)
-        print "| Done."
+#         self.log.write("Done.")
 
         
     def saveSlideXmlData(self, xmlPath):
@@ -94,15 +108,12 @@ class SvgSlide:
                     d[key] = e.attrib[key] == "True"
                 self.movieData.append(d)
                 
-     
+    def provideRasterImage(self, log=None):
+        return self.svgToPng.convertForHash(self.hash, log)
     
-    def pixmap(self):
-        pass
-    
-    def plainSvgPath(self):
-        # path of svg file without any flowed text and movies
-        pass
-    
-    def movieData(self):
-        pass
+    def numberOfMovies(self):
+        return len(self.movieData)
+
+    def dataForMovie(self, movieIndex):
+        return self.movieData[movieIndex]
     

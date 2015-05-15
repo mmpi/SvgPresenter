@@ -1,5 +1,7 @@
-from PyQt4 import QtCore
-import vlc
+from PyQt4 import QtCore, QtGui
+import vlc.vlc as vlc
+
+from log.Log import Log
 # from svg.PlainSvgToPixmap import createPixmaps
 
 class PresentationController(QtCore.QObject):
@@ -7,68 +9,71 @@ class PresentationController(QtCore.QObject):
     startMovie = QtCore.pyqtSignal()
     closeDown = QtCore.pyqtSignal()
                
-    def __init__(self, svgLoader):
+    def __init__(self, presentation):
         QtCore.QObject.__init__(self)
-        self.svgLoader = svgLoader
-        self.pixmaps = createPixmaps(self.svgLoader)
-        self.movieData = self.svgLoader.movieData
-        self.numSlides = len(self.pixmaps)
-        
-        self.libvlc = vlc.Instance(["--no-audio","--no-xlib"])
-        self.slideIndex = 0
-        self.movieOnSlide = -1
-        self.currentMovie = None
+        self.presentation = presentation
 
+        self.log = Log()
+        self.libvlc = vlc.Instance(["--no-audio","--no-xlib"])
+        
+        self.numSlides = self.presentation.numberOfSlides()
+        self.pixmaps = self.preparePixmaps()
+        self.setSlideIndex(0)
+
+    def preparePixmaps(self):
+        self.log.write("Preparing slide pixmaps...")
+        subLog = self.log.subLayer()
+        pixmaps = []
+        for slide in self.presentation:
+            pixmaps.append(QtGui.QPixmap(slide.provideRasterImage(subLog)))
+        self.log.write("Done.")
+        return pixmaps
+
+    def setSlideIndex(self, index):
+        self.slideIndex = index
+        if self.slideIndex < self.numSlides:
+            self.slide = self.presentation.slide(self.slideIndex)
+        self.movieOnSlide = -1
+        self.currentMovieData = None
+        self.slideChange.emit()
+    
     def getCurrentPixmap(self):
-        if self.slideIndex == self.numSlides:
-            return None
-        else:
+        if self.slideIndex < self.numSlides:
             return self.pixmaps[self.slideIndex]
+        else:
+            return None
 
     def getCurrentMovieData(self):
-        return self.currentMovie
+        return self.currentMovieData
     
     def createMediaPlayer(self):
         return self.libvlc.media_player_new()
     
     def first(self):
-        self.slideIndex = 0
-        self.movieOnSlide = -1
-        self.currentMovie = None
-        self.slideChange.emit()
+        self.setSlideIndex(0)
 
     def last(self):
-        self.slideIndex = self.numSlides-1
-        self.movieOnSlide = -1
-        self.currentMovie = None
-        self.slideChange.emit()
+        self.setSlideIndex(self.numSlides-1)
 
     def forward(self):
         if self.slideIndex < self.numSlides:
             # not yet all movies shown?
             self.movieOnSlide += 1
-            if self.movieOnSlide<len(self.movieData[self.slideIndex]):
-                self.currentMovie = self.movieData[self.slideIndex][self.movieOnSlide]
+            if self.movieOnSlide < self.slide.numberOfMovies():
+                self.currentMovieData = self.slide.dataForMovie(self.movieOnSlide)
                 
-                media = self.libvlc.media_new(unicode(self.currentMovie["path"]))
-                if self.currentMovie["loop"]:
+                media = self.libvlc.media_new(unicode(self.currentMovieData["path"]))
+                if self.currentMovieData["loop"]:
                     media.add_option("input-repeat=-1") # repeat
-                self.currentMovie["media"] = media
+                self.currentMovieData["media"] = media
     
                 self.startMovie.emit()
             else:
-                self.slideIndex += 1
-                self.movieOnSlide = -1
-                self.currentMovie = None
-                self.slideChange.emit()
+                self.setSlideIndex(self.slideIndex + 1)
         
     def backward(self):
-        self.slideIndex -= 1
-        self.movieOnSlide = -1
-        if self.slideIndex < 0:
-            self.slideIndex = 0
-        self.currentMovie = None
-        self.slideChange.emit()
+        self.setSlideIndex(max(0, self.slideIndex - 1))
                 
     def close(self):
         self.closeDown.emit()
+        
