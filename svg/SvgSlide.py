@@ -1,5 +1,8 @@
+import subprocess
+
 from log.Log import Log
 from svg.XmlNamespaces import etree, NSS
+import svg.SvgManipulations as SvgManipulations
 from buffer.FileBuffer import FileBuffer
 from fileConverter.BufferedSvgToPng import BufferedSvgToPng
 
@@ -65,23 +68,35 @@ class SvgSlide:
         
         # movies
         self.movieData = []
-        MovieHrefKey = "{%s}moviehref"%NSS["svgpresenter"]
-        MoviePlayOnClick = "{%s}playonclick"%NSS["svgpresenter"]
-        MovieLoop = "{%s}loop"%NSS["svgpresenter"]
-        movieElements = svgRoot.findall(".//*[@%s]"%MovieHrefKey, NSS)
-        for movie in movieElements:
-            d = {}
-            d["path"] = movie.get(MovieHrefKey)
-            d["playonclick"] = movie.get(MoviePlayOnClick, "1") == "1"
-            d["loop"] = movie.get(MovieLoop, "0") == "0"
-            d["x"] = float(movie.get("x"))
-            d["y"] = float(movie.get("y"))
-            d["width"] = float(movie.get("width"))
-            d["height"] = float(movie.get("height"))
-            self.movieData.append(d)
+        movieElements = svgRoot.findall(".//*[@%s]"%SvgManipulations.MovieHrefKey, NSS)
+        if len(movieElements)>0:
+            subLog.write("Querying movie positions and sizes...")
+            output = subprocess.check_output(["inkscape",
+                                              "--without-gui",
+                                              "--file="+svgPath,
+                                              "--query-all",])
+            
+            PositionAndSizeFields = ["x","y","width","height"]
+            lines = output.split()
+            objects = {}
+            for line in lines:
+                fields = line.split(",")
+                id = fields[0]
+                objects[id] = {}
+                for i, k in enumerate(PositionAndSizeFields):
+                    objects[id][k] = fields[i+1]
+            
+            for movie in movieElements:
+                d = {}
+                d["path"] = movie.get(SvgManipulations.MovieHrefKey)
+                d["playonclick"] = movie.get(SvgManipulations.MoviePlayOnClick, "1") == "1"
+                d["loop"] = movie.get(SvgManipulations.MovieLoop, "0") == "0"
+                id = movie.get("id")
+                for key in PositionAndSizeFields:
+                    d[key] = float(objects[id][key])
+                self.movieData.append(d)
 #         self.log.write("Done.")
-
-        
+       
     def saveSlideXmlData(self, xmlPath):
         slide = etree.Element("slide")
         etree.SubElement(slide, "static")
