@@ -1,2 +1,3 @@
 *.pyc
 inkscapeExtensions/inkex.py
+.project
