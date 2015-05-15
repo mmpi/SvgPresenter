@@ -141,6 +141,11 @@ class SvgSlide:
     def provideRasterImage(self, log=None):
         return self.svgToPng.convertForHash(self.hash, log)
     
+    def provideRasterImageWithResolution(self, width, height, log=None):
+        pngWhBuffer = self.buffer.transientSubBuffer("png-%dx%d"%(width,height))
+        svgToPngWh = BufferedSvgToPng(self.rawSvgBuffer, pngWhBuffer)
+        return svgToPngWh.convertForHash(self.hash, width=width, height=height, log=log)
+    
     def numberOfMovies(self):
         return len(self.movieData)
 

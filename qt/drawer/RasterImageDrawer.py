@@ -6,3 +6,4 @@ class RasterImageDrawer:
     def __call__(self, painter):
         painter.setRenderHint(QtGui.QPainter.SmoothPixmapTransform)
         painter.drawPixmap(painter.window(), self.pixmap)
+    

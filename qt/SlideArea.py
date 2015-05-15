@@ -3,11 +3,11 @@ from PyQt4 import QtGui
 
 from movie.MovieWidget import MovieWidget
 
-class SlideArea(QtGui.QLabel):
+class SlideArea(QtGui.QWidget):
     resized = QtCore.pyqtSignal('float')
 
     def __init__(self, parent, presentationController):
-        QtGui.QLabel.__init__(self, parent)
+        QtGui.QWidget.__init__(self, parent)
 
         self.movieWidgets = []
         self.presentationController = presentationController
@@ -29,7 +29,7 @@ class SlideArea(QtGui.QLabel):
 
     def preferredSize(self, maxSize=None):
         if maxSize is None:
-            return QtCore.QSize(self.presentationController.slideSize)
+            return QtCore.QSize(self.slideSize)
         else:
             scaledSize = QtCore.QSize(self.slideSize)
             scaledSize.scale(maxSize, QtCore.Qt.KeepAspectRatio)
@@ -43,7 +43,7 @@ class SlideArea(QtGui.QLabel):
     def paintEvent(self, event):
         painter = QtGui.QPainter()
         painter.begin(self)
-        self.presentationController.drawSlide(painter)
+        self.presentationController.drawSlide(painter, self.presentationController.slideIndex)
         painter.end()
 
     def startMovie(self):

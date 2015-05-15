@@ -14,4 +14,7 @@ class PdfDrawer:
 #         self.page.renderToPainter(painter, factor*90, factor*90, 0, 0, size.width(), size.height())
         img = self.page.renderToImage(factor*90, factor*90, 0, 0, size.width(), size.height())
         painter.drawImage(painter.window(), img)
+    def image(self, size):
+        factor = size.width()*1.0/self.pageWidth
+        return self.page.renderToImage(factor*90, factor*90, 0, 0, size.width(), size.height())
         

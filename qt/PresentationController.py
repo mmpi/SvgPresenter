@@ -5,7 +5,7 @@ from drawer import DrawerGenerators
 from movie.MovieData import MovieData
 
 class PresentationController(QtCore.QObject):
-    slideChange = QtCore.pyqtSignal()
+    slideChange = QtCore.pyqtSignal('int')
     startMovie = QtCore.pyqtSignal()
     closeDown = QtCore.pyqtSignal()
                
@@ -41,9 +41,9 @@ class PresentationController(QtCore.QObject):
         self.log.write("Done.")
         return movieDataForAllSlides
 
-    def drawSlide(self, painter):
-        if self.slideIndex < self.numSlides:
-            return self.slideDrawers[self.slideIndex](painter)
+    def drawSlide(self, painter, index):
+        if index < self.numSlides:
+            return self.slideDrawers[index](painter)
 
     def setSlideIndex(self, index):
         self.slideIndex = index
@@ -51,7 +51,7 @@ class PresentationController(QtCore.QObject):
             self.slide = self.presentation.slide(self.slideIndex)
             self.currentMovieData = self.movieData[index]
         self.movieOnSlide = -1
-        self.slideChange.emit()
+        self.slideChange.emit(self.slideIndex)
 
     def getCurrentMovieData(self):
         return self.currentMovieData[self.movieOnSlide]

@@ -3,12 +3,14 @@ from PyQt4 import QtCore
 
 from BaseDisplay import BaseDisplay
 from SlideArea import SlideArea
+from BufferedSlideArea import BufferedSlideArea
 
 class AudienceDisplay(BaseDisplay):
     def __init__(self, presentationController):
         BaseDisplay.__init__(self, presentationController)
         
-        self.slideArea = SlideArea(self, self.presentationController)
+#         self.slideArea = SlideArea(self, self.presentationController)
+        self.slideArea = BufferedSlideArea(self, self.presentationController)
         self.presentationController.slideChange.connect(self.slideArea.showNewSlide)
         self.presentationController.startMovie.connect(self.slideArea.startMovie)
 

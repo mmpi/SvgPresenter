@@ -1,6 +1,8 @@
 import os
 import os.path
-import hashlib, base64
+import tempfile
+import shutil
+import hashlib
 
 class FileBuffer:
     def __init__(self, path):
@@ -16,6 +18,8 @@ class FileBuffer:
                 self.existingFiles[hash] = subpath 
         self.used = {}
         self.subBuffers = {}
+        self.tempPath = None
+        self.transientSubBuffers = {}
 
     def cleanUp(self):
         for key in self.subBuffers:
@@ -28,12 +32,20 @@ class FileBuffer:
                     os.remove(self.existingFiles[hash])
             if count>0:
                 print "%d files removed from buffer %s."%(count, self.path)
+        if not self.tempPath is None:
+            shutil.rmtree(self.tempPath)
 
     def subBuffer(self, folderName):
         if not folderName in self.subBuffers:
             self.subBuffers[folderName] = FileBuffer(os.path.join(self.path, folderName))        
         return self.subBuffers[folderName]
 
+    def transientSubBuffer(self, folderName):
+        if not folderName in self.transientSubBuffers:
+            if self.tempPath is None:
+                self.tempPath = tempfile.mkdtemp()
+            self.transientSubBuffers[folderName] = FileBuffer(os.path.join(self.tempPath, folderName))        
+        return self.transientSubBuffers[folderName]
     
     def useFileWithHash(self, hash):
         if hash in self.existingFiles:

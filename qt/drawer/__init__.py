@@ -1,7 +1,9 @@
 from RasterImageDrawer import RasterImageDrawer
-from SvgDrawer import SvgDrawer
 from PdfDrawer import PdfDrawer
+from SvgDrawer import SvgDrawer
+from SvgRasterDrawer import SvgRasterDrawer
 
 DrawerGenerators = {"raster": lambda slide, log: RasterImageDrawer(slide.provideRasterImage(log)),
+                    "pdf":  lambda slide, log: PdfDrawer(slide.providePdfFile(log)),
                     "svg":  lambda slide, log: SvgDrawer(slide.provideSvgFile(log)),
-                    "pdf":  lambda slide, log: PdfDrawer(slide.providePdfFile(log)),}
+                    "svgRaster":  lambda slide, log: SvgRasterDrawer(slide, log),}
