@@ -38,7 +38,7 @@ from fileConverter.BufferedFileConverter import BufferedFileConverter
 #         self.output(self.svgPath)
 
 
-class BufferedSvgToPdf(BufferedFileFilter.BufferedFileFilter):
+class BufferedSvgToPdf(BufferedFileConverter):
     FileNameExtension = ".pdf"
     def convert(self, fromPath, toPath, log=None):
         if not log is None:

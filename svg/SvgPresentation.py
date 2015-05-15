@@ -1,4 +1,5 @@
 import os.path
+import subprocess
 
 from log.Log import Log
 from buffer.FileBuffer import FileBuffer
@@ -77,7 +78,7 @@ class SvgPresentation:
 
         # show all layers
         for layer in layers:
-            SvgManipulationsRasterImage.removeStyleAttribute(layer, "display:none")
+            SvgManipulations.removeStyleAttribute(layer, "display:none")
             SvgManipulations.removeStyleAttribute(layer, "display:inline")
             
 #         tree.write(svgPath+"-debug.svg", encoding="UTF-8", xml_declaration=True)
@@ -98,7 +99,7 @@ class SvgPresentation:
             
             # scan for references
             defsCollector = SvgManipulations.DefsCollector(newSvgRoot)
-            for newLayerIndeRasterImagex, newLayer in enumerate(newLayers):
+            for newLayerIndex, newLayer in enumerate(newLayers):
                 if (newLayerIndex==layerIndex) or SvgManipulations.isBackground(newLayer):
                     defsCollector.addRecursively(newLayer)
 
@@ -154,9 +155,13 @@ class SvgPresentation:
             pdfPath = basePath + ".pdf"
         self.log.write("Exporting presentation as %s..."%pdfPath)
         subLog = self.log.subLayer()
+        
         slidePdfPaths = []
         for slide in self.slides:
             slidePdfPaths.append(slide.providePdfFile(subLog))
+            
+        subLog.write("Concatenating...")
         subprocess.check_output(["pdftk"] + slidePdfPaths + ["cat", "output", pdfPath])
+        
         self.log.write("Done.")        
         
