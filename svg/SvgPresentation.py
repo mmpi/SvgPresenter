@@ -1,10 +1,8 @@
 import os.path
-import xml.etree.ElementTree as etree
 
 from buffer.FileBuffer import FileBuffer
-from svg.SvgData import SvgData
-from svg.xmlNamespaces import NSS
-from svg.DefsCollector import DefsCollector
+from svg.XmlNamespaces import etree, NSS
+import svg.SvgManipulations as SvgManipulations
 from svg.SvgSlide import SvgSlide 
 
 class SvgPresentation:
@@ -59,7 +57,7 @@ class SvgPresentation:
         # look for layers and slides
         print "Looking for layers..."
         root = tree.getroot()
-        layers = SvgData.extractAllLayers(root)
+        layers = SvgManipulations.extractAllLayers(root)
         print "%d layers found."%len(layers)
 
         # remove unneeded data (for a higher probability of hashs being equal)
@@ -73,8 +71,8 @@ class SvgPresentation:
 
         # show all layers
         for layer in layers:
-            SvgData.removeStyleAttribute(layer, "display:none")
-            SvgData.removeStyleAttribute(layer, "display:inline")
+            SvgManipulations.removeStyleAttribute(layer, "display:none")
+            SvgManipulations.removeStyleAttribute(layer, "display:inline")
             
 #         tree.write(svgPath+"-debug.svg", encoding="UTF-8", xml_declaration=True)
 
@@ -82,20 +80,20 @@ class SvgPresentation:
         print "Creating slides..."
         for layerIndex, layer in enumerate(layers):
             # only loop over slides
-            if SvgData.isBackground(layer):
+            if SvgManipulations.isBackground(layer):
                 continue
             
 #             print "."
 
-            # new svg tree, because we will delete stuff!
+            # xmlNamespacesnew svg tree, because we will delete stuff!
             newSvgTree = etree.ElementTree(root.copy())
             newSvgRoot = newSvgTree.getroot()
-            newLayers = SvgData.extractAllLayers(newSvgRoot)
+            newLayers = SvgManipulations.extractAllLayers(newSvgRoot)
             
             # scan for references
-            defsCollector = DefsCollector(newSvgRoot)
+            defsCollector = SvgManipulations.DefsCollector(newSvgRoot)
             for newLayerIndex, newLayer in enumerate(newLayers):
-                if (newLayerIndex==layerIndex) or SvgData.isBackground(newLayer):
+                if (newLayerIndex==layerIndex) or SvgManipulations.isBackground(newLayer):
                     defsCollector.addRecursively(newLayer)
 
             # delete unused defs
@@ -105,7 +103,7 @@ class SvgPresentation:
                                     
             # delete unused layers
             for newLayerIndex, newLayer in enumerate(newLayers):
-                if (newLayerIndex!=layerIndex) and not SvgData.isBackground(newLayer):
+                if (newLayerIndex!=layerIndex) and not SvgManipulations.isBackground(newLayer):
                     newSvgRoot.remove(newLayer)
             
             # add my defs

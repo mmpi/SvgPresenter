@@ -15,19 +15,19 @@ class FileBuffer:
                 hash, ext = os.path.splitext(entry)
                 self.existingFiles[hash] = subpath 
         self.used = {}
-        self.subBuffers = []
+        self.subBuffers = {}
 
     def cleanUp(self):
-        for s in self.subBuffers:
-            s.cleanUp()
+        for key in self.subBuffers:
+            self.subBuffers[key].cleanUp()
         for hash in self.existingFiles:
             if not hash in self.used:
                 os.remove(self.existingFiles[hash])
 
     def subBuffer(self, folderName):
-        s = FileBuffer(os.path.join(self.path, folderName))        
-        self.subBuffers.append(s)
-        return s
+        if not folderName in self.subBuffers:
+            self.subBuffers[folderName] = FileBuffer(os.path.join(self.path, folderName))        
+        return self.subBuffers[folderName]
 
     
     def useFileWithHash(self, hash):

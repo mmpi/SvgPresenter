@@ -1,7 +1,6 @@
-import xml.etree.ElementTree as etree
+from svg.XmlNamespaces import etree, NSS
 from buffer.FileBuffer import FileBuffer
-from svg.xmlNamespaces import NSS
-from svg.SvgWriter import SvgWriter
+
 
 class SvgSlide:
     @staticmethod
@@ -41,11 +40,11 @@ class SvgSlide:
 
     def __init__(self, buffer):
         self.buffer = buffer
-        self.svgBuffer = self.buffer.subBuffer("svg")
+        self.svgBuffer = self.buffer.subBuffer("rawSvg")
         self.xmlBuffer = self.buffer.subBuffer("xml")
         
     def loadFromSvgRootElement(self, svgRoot):
-        print "Loading slide from svg data..."
+        print "| Loading slide from svg data..."
         # TODO: this should actually be done by a SvgSlideLayer class
         svgPath = self.svgBuffer.registerAndUseFileWithHash(self.hash, ".svg")
         etree.ElementTree(svgRoot).write(svgPath, encoding="UTF-8", xml_declaration=True)
@@ -66,6 +65,7 @@ class SvgSlide:
             d["width"] = float(movie.get("width"))
             d["height"] = float(movie.get("height"))
             self.movieData.append(d)
+        print "| Done."
 
         
     def saveSlideXmlData(self, xmlPath):

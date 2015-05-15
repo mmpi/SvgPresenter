@@ -1,3 +1,5 @@
+import xml.etree.ElementTree as etree
+
 NSS = {
 u'sodipodi' :u'http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd',
 u'cc'       :u'http://web.resource.org/cc/',
