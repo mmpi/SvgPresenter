@@ -27,7 +27,7 @@ class PresentationController(QtCore.QObject):
         self.log.write("Preparing slide drawers...")
         subLog = self.log.subLayer()
         slideDrawers = []
-        Mode = "svg"
+        Mode = "raster"
         DrawerGenerators = {"raster": lambda slide, log: RasterImageDrawer(slide.provideRasterImage(log)),
                             "svg":  lambda slide, log: SvgDrawer(slide.provideSvgFile(log)),
                             "pdf":  lambda slide, log: PdfDrawer(slide.providePdfFile(log)),}

@@ -20,9 +20,14 @@ class FileBuffer:
     def cleanUp(self):
         for key in self.subBuffers:
             self.subBuffers[key].cleanUp()
-        for hash in self.existingFiles:
-            if not hash in self.used:
-                os.remove(self.existingFiles[hash])
+        if len(self.used.keys())>0:
+            count = 0
+            for hash in self.existingFiles:
+                if not hash in self.used:
+                    counbt += 1
+                    os.remove(self.existingFiles[hash])
+            if count>0:
+                print "%d files removed from buffer %s."%(count, self.path)
 
     def subBuffer(self, folderName):
         if not folderName in self.subBuffers:
