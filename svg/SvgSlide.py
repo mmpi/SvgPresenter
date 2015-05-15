@@ -64,7 +64,7 @@ class SvgSlide:
         # the following will be set by the static factory functions
         self.hash = None
         self.movieData = []
-        
+    
     def loadFromSvgRootElement(self, svgRoot):
         self.log.write("Loading slide from svg data...")
         subLog = self.log.subLayer()

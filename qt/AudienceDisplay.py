@@ -13,10 +13,11 @@ class AudienceDisplay(BaseDisplay):
         self.presentationController.startMovie.connect(self.slideArea.startMovie)
 
         self.setMinimumSize(640, 480)
+        self.resize(self.slideArea.preferredSize())
+       
     
     def resizeEvent(self, event):
-        slideSize = self.slideArea.nativeResolution()
-        slideSize.scale(self.width(), self.height(), QtCore.Qt.KeepAspectRatio)
+        slideSize = self.slideArea.preferredSize(self.size())
         self.slideArea.setGeometry(0.5*(self.width()-slideSize.width()), 0.5*(self.height()-slideSize.height()), slideSize.width(), slideSize.height())
 
     def mouseDoubleClickEvent (self, event):

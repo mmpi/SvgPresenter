@@ -59,11 +59,15 @@ class SvgPresentation:
 #             import xml.etree.ElementTree as etree
 #             tree = etree.ElementTree(etree.fromstring(data))
         data = None
+        root = tree.getroot()
 #         self.log.write("Done.")
+
+        # check dimensions
+        self.width = float(root.get("width"))
+        self.height = float(root.get("height"))
 
         # look for layers and slides
         self.log.write("Looking for layers...")
-        root = tree.getroot()
         layers = SvgManipulations.extractAllLayers(root)
         self.log.write("%d layers found."%len(layers))
 
@@ -130,6 +134,8 @@ class SvgPresentation:
         print "Loading buffered presentation data..."
         presentationTree = etree.parse(path)
         presentation = presentationTree.getroot()
+        self.width = float(presentation.get("width"))
+        self.height = float(presentation.get("height"))
         for e in presentation:
             slide = SvgSlide.createFromPresentationXmlElement(self.slideBuffer, e)
             self.slides.append(slide)
@@ -138,6 +144,8 @@ class SvgPresentation:
     def saveToXmlFile(self, path):
         # create xml digest
         presentation = etree.Element("presentation")
+        presentation.set("width", str(self.width))
+        presentation.set("height", str(self.height))
         for slide in self.slides:
             presentation.append(slide.createPresentationXmlElement())
         presentationTree = etree.ElementTree(presentation)

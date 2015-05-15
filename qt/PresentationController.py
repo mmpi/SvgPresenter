@@ -2,7 +2,9 @@ from PyQt4 import QtCore, QtGui
 import vlc.vlc as vlc
 
 from log.Log import Log
-# from svg.PlainSvgToPixmap import createPixmaps
+from drawer.RasterImageDrawer import RasterImageDrawer
+from drawer.SvgDrawer import SvgDrawer
+from drawer.PdfDrawer import PdfDrawer
 
 class PresentationController(QtCore.QObject):
     slideChange = QtCore.pyqtSignal()
@@ -12,22 +14,32 @@ class PresentationController(QtCore.QObject):
     def __init__(self, presentation):
         QtCore.QObject.__init__(self)
         self.presentation = presentation
+        self.slideSize = QtCore.QSize(presentation.width, presentation.height)
 
         self.log = Log()
         self.libvlc = vlc.Instance(["--no-audio","--no-xlib"])
         
         self.numSlides = self.presentation.numberOfSlides()
-        self.pixmaps = self.preparePixmaps()
+        self.slideDrawers = self.prepareSlideDrawers()
         self.setSlideIndex(0)
 
-    def preparePixmaps(self):
-        self.log.write("Preparing slide pixmaps...")
+    def prepareSlideDrawers(self):
+        self.log.write("Preparing slide drawers...")
         subLog = self.log.subLayer()
-        pixmaps = []
+        slideDrawers = []
+        Mode = "svg"
+        DrawerGenerators = {"raster": lambda slide, log: RasterImageDrawer(slide.provideRasterImage(log)),
+                            "svg":  lambda slide, log: SvgDrawer(slide.provideSvgFile(log)),
+                            "pdf":  lambda slide, log: PdfDrawer(slide.providePdfFile(log)),}
+        drawerGenerator = DrawerGenerators[Mode]
         for slide in self.presentation:
-            pixmaps.append(QtGui.QPixmap(slide.provideRasterImage(subLog)))
+            slideDrawers.append(drawerGenerator(slide, subLog))
         self.log.write("Done.")
-        return pixmaps
+        return slideDrawers
+
+    def drawSlide(self, painter):
+        if self.slideIndex < self.numSlides:
+            return self.slideDrawers[self.slideIndex](painter)
 
     def setSlideIndex(self, index):
         self.slideIndex = index
@@ -36,12 +48,6 @@ class PresentationController(QtCore.QObject):
         self.movieOnSlide = -1
         self.currentMovieData = None
         self.slideChange.emit()
-    
-    def getCurrentPixmap(self):
-        if self.slideIndex < self.numSlides:
-            return self.pixmaps[self.slideIndex]
-        else:
-            return None
 
     def getCurrentMovieData(self):
         return self.currentMovieData

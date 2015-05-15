@@ -6,18 +6,18 @@ from MovieWidget import MovieWidget
 class SlideArea(QtGui.QLabel):
     resized = QtCore.pyqtSignal('float')
 
-    def __init__(self, parent, presentation):
+    def __init__(self, parent, presentationController):
         QtGui.QLabel.__init__(self, parent)
 
         self.movieWidgets = []
-        self.presentation = presentation
+        self.presentationController = presentationController
+        self.slideSize = QtCore.QSize(self.presentationController.slideSize)
 
 #         self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
 #         self.setAlignment(Qt.AlignCenter)
         palette = QtGui.QPalette()
         palette.setColor(QtGui.QPalette.Background, QtCore.Qt.black)
         self.setPalette(palette)
-#         self.resize(1024,768)
 
     def showNewSlide(self):
         for w in self.movieWidgets:
@@ -25,36 +25,32 @@ class SlideArea(QtGui.QLabel):
             self.resized.disconnect(w.updateGeometry)
             w.close()
         self.movieWidgets = []
-        self.setLabelPixmap()
+        self.update()
 
-    def setLabelPixmap(self):
-        original = self.presentation.getCurrentPixmap()
-        if not original is None:
-            size = QtCore.QSizeF(original.size())
-            size.scale(QtCore.QSizeF(self.size()), QtCore.Qt.KeepAspectRatio)
-            self.factor = size.width()/original.size().width()
-    #         print self.factor 
-            self.setPixmap(original.scaled(self.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
+    def preferredSize(self, maxSize=None):
+        if maxSize is None:
+            return QtCore.QSize(self.presentationController.slideSize)
         else:
-            self.setPixmap(QtGui.QPixmap())
-            
+            scaledSize = QtCore.QSize(self.slideSize)
+            scaledSize.scale(maxSize, QtCore.Qt.KeepAspectRatio)
+            return scaledSize
+
     def resizeEvent(self, event):
-        self.setLabelPixmap()
+        self.factor = 1.0*self.size().width()/self.slideSize.width()
+        self.update()
         self.resized.emit(self.factor)
-#         print self.pos().x(),self.pos().y()
 
-    def nativeResolution(self):
-        original = self.presentation.getCurrentPixmap()
-        if original is None:
-            return QtCore.QSize(0,0)
-        else:
-            return original.size()
-    
+    def paintEvent(self, event):
+        painter = QtGui.QPainter()
+        painter.begin(self)
+        self.presentationController.drawSlide(painter)
+        painter.end()
+
     def startMovie(self):
-        movieData = self.presentation.getCurrentMovieData()
+        movieData = self.presentationController.getCurrentMovieData()
         if movieData is None:
             return
-        mediaPlayer = self.presentation.createMediaPlayer()
+        mediaPlayer = self.presentationController.createMediaPlayer()
         widget = MovieWidget(self, movieData, mediaPlayer)
         widget.updateGeometry(self.factor)
         widget.start()
