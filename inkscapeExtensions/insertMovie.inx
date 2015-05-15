@@ -1,0 +1,20 @@
+<inkscape-extension>
+  <_name>Insert Movie</_name>
+  <id>org.ekips.filter.svgPresenter.insertMovie</id>
+  <dependency type="executable" location="extensions">insertMovie.py</dependency>
+  <dependency type="executable" location="extensions">inkex.py</dependency>
+  <param name="moviepath" type="string" _gui-text="Path of movie file"></param>
+  <param name="embedmovie" type="boolean" _gui-text="Embed movie">true</param>
+  <param name="playonclick" type="boolean" _gui-text="Play on click">true</param>
+  <param name="loop" type="boolean" _gui-text="Loop">false</param>
+  <param name="stillimagefraction" type="int" min="0" max="100" _gui-text="Position of still image in movie (in %)">0.0</param>
+  <effect>
+    <object-type>all</object-type>
+    <effects-menu>
+        <submenu _name="Svg Presenter"/>
+    </effects-menu>
+  </effect>
+  <script>
+    <command reldir="extensions" interpreter="python">insertMovie.py</command>
+  </script>
+</inkscape-extension>
