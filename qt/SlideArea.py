@@ -53,6 +53,6 @@ class SlideArea(QtGui.QLabel):
         mediaPlayer = self.presentationController.createMediaPlayer()
         widget = MovieWidget(self, movieData, mediaPlayer)
         widget.updateGeometry(self.factor)
-        widget.start()
         self.resized.connect(widget.updateGeometry)
         self.movieWidgets.append(widget)
+        widget.start()

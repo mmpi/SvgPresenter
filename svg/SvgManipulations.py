@@ -3,6 +3,7 @@ from svg.XmlNamespaces import etree, NSS
 MovieHrefKey = "{%s}moviehref"%NSS["svgpresenter"]
 MoviePlayOnClick = "{%s}playonclick"%NSS["svgpresenter"]
 MovieLoop = "{%s}loop"%NSS["svgpresenter"]
+XLinkHref = "{%s}href"%NSS["xlink"]
 
 def removeStyleAttribute(node, attribute):
     # read style attributes

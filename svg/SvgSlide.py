@@ -97,7 +97,8 @@ class SvgSlide:
                 d = {}
                 d["path"] = movie.get(SvgManipulations.MovieHrefKey)
                 d["playonclick"] = movie.get(SvgManipulations.MoviePlayOnClick, "1") == "1"
-                d["loop"] = movie.get(SvgManipulations.MovieLoop, "0") == "0"
+                d["loop"] = movie.get(SvgManipulations.MovieLoop, "0") == "1"
+                d["image"] = movie.get(SvgManipulations.XLinkHref)
                 id = movie.get("id")
                 for key in PositionAndSizeFields:
                     d[key] = float(objects[id][key])
@@ -122,7 +123,7 @@ class SvgSlide:
         for e in slide:
             if e.tag == "movie":
                 d = {}
-                for key in ["path"]:
+                for key in ["path", "image"]:
                     d[key] = e.attrib[key]
                 for key in ["x", "y", "width", "height"]:
                     d[key] = float(e.attrib[key])
