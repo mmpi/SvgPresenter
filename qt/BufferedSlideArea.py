@@ -43,7 +43,10 @@ class BufferedSlideArea(QtGui.QLabel):
             pixmapSize = self.preferredSize(self.size())
             pixmap = self.pixmapBuffer.currentPixmap()
             if not pixmap is None:
-                self.setPixmap(pixmap.scaled(pixmapSize, QtCore.Qt.KeepAspectRatio))
+                if pixmapSize==pixmap.size():
+                    self.setPixmap(pixmap)
+                else:
+                    self.setPixmap(pixmap.scaled(pixmapSize, QtCore.Qt.KeepAspectRatio))
             else:
                 self.setPixmap(QtGui.QPixmap())
             self.factor = 1.0*self.size().width()/self.pixmapBuffer.originalSize.width()

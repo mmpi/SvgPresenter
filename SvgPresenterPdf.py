@@ -19,7 +19,7 @@ else:
         sys.exit(1)
     
     # create pdf
-    presentation.exportAsPdf()    
+#     presentation.exportAsPdf()    
         
     app = QtGui.QApplication(sys.argv)
     pc = PresentationController(presentation, "pdf")
