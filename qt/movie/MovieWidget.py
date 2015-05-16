@@ -40,5 +40,5 @@ class MovieWidget(QtGui.QLabel):
 #         print "Stopped: ", self.data["path"]
 #         self.close()
 #         print "trying to release player..."
-        self.player.release()
+#         self.player.release()
         pass

@@ -25,6 +25,7 @@ class SvgSlide:
             xmlPath = slide.xmlBuffer.registerAndUseFileWithHash(slide.hash, ".xml")
             slide.saveSlideXmlData(xmlPath)
         else:
+            slide.rawSvgBuffer.useFileWithHash(slide.hash)
             slide.loadSlideXmlData(xmlPath)
 
         return slide
