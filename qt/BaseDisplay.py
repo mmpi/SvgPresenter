@@ -82,13 +82,13 @@ class BaseDisplay(QtGui.QMainWindow):
         print self.windowTitle(), screenIndex
         fullscreen = self.windowState() & QtCore.Qt.WindowFullScreen
         if fullscreen:
-            self.setWindowState(self.windowState() & ~QtCore.Qt.WindowFullScreen)
+            self.setFullScreen(False)
         screenRect = self.desktop.availableGeometry(screenIndex)
         x = screenRect.x() + 0.5*(screenRect.width()-self.frameGeometry().width())
         y = screenRect.y() + 0.5*(screenRect.height()-self.frameGeometry().height())
         self.move(x, y)
         if fullscreen:
-            self.setWindowState(self.windowState() | QtCore.Qt.WindowFullScreen)
+            self.setFullScreen(True)
             
                 
                         

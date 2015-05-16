@@ -25,5 +25,11 @@ class PresenterDisplay(BaseDisplay):
         slideSize = self.slideArea.preferredSize(self.size())
         self.slideArea.setGeometry(0.5*(self.width()-slideSize.width()), 0.5*(self.height()-slideSize.height()), slideSize.width(), slideSize.height())
 
+    def setFullScreen(self, bool):
+        BaseDisplay.setFullScreen(self, bool and (self.desktop.screenCount()>1))
+        
     def putOnRightScreen(self):
         self.putOnScreen(self.primaryScreenIndex())
+        if self.desktop.screenCount()<=1:
+            BaseDisplay.setFullScreen(self, False)
+

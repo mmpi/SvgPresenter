@@ -34,6 +34,7 @@ class PixmapBuffer(QtCore.QObject):
         self.pixmaps = self.numSlides*[None]
         self.thread = None
         self.currentSize = None
+        self.oldThreads = []
 
     def currentPixmap(self):
         if self.presentationController.slideIndex<self.numSlides:
@@ -41,7 +42,6 @@ class PixmapBuffer(QtCore.QObject):
         
     def initialRefill(self):
         self.refill(self.originalSize)
-#         self.wait()
         
     def refill(self, pixmapSize):
         print pixmapSize
@@ -54,12 +54,19 @@ class PixmapBuffer(QtCore.QObject):
                     print "C"
                     self.quitThread.emit()
                     print "C1"
-                    self.thread.wait()
-                    print "D"
+#                     self.thread.wait()
+#                     print "D0"
                     self.thread.pixmapUpdated.disconnect()
-                    print "D1"
+                    print "D"
                     self.quitThread.disconnect()
                     print "E"
+                    ot = list(self.oldThreads)
+                    for t in ot:
+                        if t.isFinished():
+                            self.oldThreads.remove(t)
+                    print "E1"
+                    self.oldThreads.append(self.thread)
+                    print "E2"
             self.thread = DrawerThread(self.presentationController.slideDrawers, pixmapSize, self.presentationController.slideIndex)
             print "F"
             self.quitThread.connect(self.thread.stop)
@@ -68,10 +75,6 @@ class PixmapBuffer(QtCore.QObject):
             print "H"
             self.thread.start()
             print "I"
-
-        
-    def wait(self):
-        self.thread.wait()
 
     def updatePixmap(self, index, image):
         self.pixmaps[index] = QtGui.QPixmap.fromImage(image)
