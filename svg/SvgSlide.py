@@ -37,6 +37,7 @@ class SvgSlide:
         if xmlpath is None:
             return None
         else:
+            slide.rawSvgBuffer.useFileWithHash(slide.hash)
             slide.loadSlideXmlData(xmlpath)
             return slide
     

@@ -5,6 +5,7 @@ from PyQt4 import QtGui
 from svg.SvgPresentation import SvgPresentation
 from qt.PresentationController import PresentationController
 from qt.AudienceDisplay import AudienceDisplay
+from qt.PresenterDisplay import PresenterDisplay
 
 if len(sys.argv)<2:
     print "Usage: SvgPresenter.py <svgfile>"
@@ -22,12 +23,13 @@ else:
     presentation.exportAsPdf()    
         
     app = QtGui.QApplication(sys.argv)
+    desktop = app.desktop()
     pc = PresentationController(presentation, "svgRaster")
-    ad1 = AudienceDisplay(pc)
-    ad1.show()
-    # ad2 = AudienceDisplay(presentation)
-    # ad2.show()
-    # ad.showFullScreen()
+    pd = PresenterDisplay(desktop, pc)
+    pd.show()
+    ad = AudienceDisplay(desktop, pc)
+    ad.show()
+#     ad.showFullScreen()
      
     ret = app.exec_()
     presentation.cleanUp()

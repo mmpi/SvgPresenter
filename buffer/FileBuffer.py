@@ -28,7 +28,7 @@ class FileBuffer:
             count = 0
             for hash in self.existingFiles:
                 if not hash in self.used:
-                    counbt += 1
+                    count += 1
                     os.remove(self.existingFiles[hash])
             if count>0:
                 print "%d files removed from buffer %s."%(count, self.path)

@@ -7,6 +7,9 @@ from movie.MovieData import MovieData
 class PresentationController(QtCore.QObject):
     slideChange = QtCore.pyqtSignal('int')
     startMovie = QtCore.pyqtSignal()
+    toggleAudienceDisplay = QtCore.pyqtSignal()
+    changedFullScreen = QtCore.pyqtSignal('bool')
+    changedExchangeScreens = QtCore.pyqtSignal('bool')
     closeDown = QtCore.pyqtSignal()
                
     def __init__(self, presentation, mode):
@@ -15,11 +18,19 @@ class PresentationController(QtCore.QObject):
         self.slideSize = QtCore.QSize(presentation.width, presentation.height)
 
         self.log = Log()
+        self.exchangeScreens = False
         self.numSlides = self.presentation.numberOfSlides()
         self.slideDrawers = self.prepareSlideDrawers(mode)
         self.movieData = self.prepareMovieData()
         self.setSlideIndex(0)
 
+    def setFullScreen(self, bool=True):
+        self.changedFullScreen.emit(bool)
+       
+    def toggleExchangeScreens(self):
+        self.exchangeScreens = not self.exchangeScreens
+        self.changedExchangeScreens.emit(self.exchangeScreens)
+        
     def prepareSlideDrawers(self, mode):
         self.log.write("Preparing slide drawers...")
         subLog = self.log.subLayer()
@@ -74,6 +85,9 @@ class PresentationController(QtCore.QObject):
     def backward(self):
         self.setSlideIndex(max(0, self.slideIndex - 1))
                 
+    def toggleAudience(self):
+        self.toggleAudienceDisplay.emit()
+    
     def close(self):
         self.closeDown.emit()
         

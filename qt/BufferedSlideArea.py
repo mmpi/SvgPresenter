@@ -14,18 +14,20 @@ class BufferedSlideArea(QtGui.QLabel):
         palette.setColor(QtGui.QPalette.Background, QtCore.Qt.black)
         self.setPalette(palette)
 
+        self.visible = True
         self.movieWidgets = []
         self.pixmapBuffer = PixmapBuffer(self.presentationController)
         self.pixmapBuffer.currentPixmapUpdated.connect(self.updatePixmap)
         self.pixmapBuffer.initialRefill()
-
-
+        
+    def toggleVisible(self):
+        self.visible = not self.visible
+        if not self.visible:
+            self.closeDownMovies()
+        self.updatePixmap()
+         
     def showNewSlide(self, index):
-        for w in self.movieWidgets:
-            w.stop()
-            self.resized.disconnect(w.updateGeometry)
-            w.close()
-        self.movieWidgets = []
+        self.closeDownMovies()
         self.updatePixmap()
 
     def preferredSize(self, maxSize=None):
@@ -37,13 +39,16 @@ class BufferedSlideArea(QtGui.QLabel):
             return scaledSize
 
     def updatePixmap(self):
-        pixmapSize = self.preferredSize(self.size())
-        pixmap = self.pixmapBuffer.currentPixmap()
-        if not pixmap is None:
-            self.setPixmap(pixmap.scaled(pixmapSize, QtCore.Qt.KeepAspectRatio))
+        if self.visible:
+            pixmapSize = self.preferredSize(self.size())
+            pixmap = self.pixmapBuffer.currentPixmap()
+            if not pixmap is None:
+                self.setPixmap(pixmap.scaled(pixmapSize, QtCore.Qt.KeepAspectRatio))
+            else:
+                self.setPixmap(QtGui.QPixmap())
+            self.factor = 1.0*self.size().width()/self.pixmapBuffer.originalSize.width()
         else:
             self.setPixmap(QtGui.QPixmap())
-        self.factor = 1.0*self.size().width()/self.pixmapBuffer.originalSize.width()
         
     def resizeEvent(self, event):
         self.updatePixmap()
@@ -51,8 +56,17 @@ class BufferedSlideArea(QtGui.QLabel):
         self.resized.emit(self.factor)
 
     def startMovie(self):
-        widget = MovieWidget(self, self.presentationController.getCurrentMovieData())
-        self.resized.connect(widget.updateGeometry)
-        self.movieWidgets.append(widget)
-        widget.updateGeometry(self.factor)
-        widget.start()
+        if self.visible:
+            widget = MovieWidget(self, self.presentationController.getCurrentMovieData())
+            self.resized.connect(widget.updateGeometry)
+            self.movieWidgets.append(widget)
+            widget.updateGeometry(self.factor)
+            widget.start()
+
+    def closeDownMovies(self):
+        for w in self.movieWidgets:
+            w.stop()
+            self.resized.disconnect(w.updateGeometry)
+            w.close()
+        self.movieWidgets = []
+        
