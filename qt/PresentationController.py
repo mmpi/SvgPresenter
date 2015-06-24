@@ -47,7 +47,7 @@ class PresentationController(QtCore.QObject):
         for slide in self.presentation:
             movieDataForCurrentSlide = []
             for i in xrange(slide.numberOfMovies()):
-                movieDataForCurrentSlide.append(MovieData(slide.dataForMovie(i)))
+                movieDataForCurrentSlide.append(MovieData(self.presentation.moviePath(), slide.dataForMovie(i)))
             movieDataForAllSlides.append(movieDataForCurrentSlide)
         self.log.write("Done.")
         return movieDataForAllSlides

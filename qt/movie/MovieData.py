@@ -1,10 +1,12 @@
+import os.path
 from PyQt4 import QtCore, QtGui
 import vlc.vlc as vlc
 
 class MovieData:
     libvlc = vlc.Instance(["--no-audio","--no-xlib"])
 
-    def __init__(self, dict):
+    def __init__(self, basePath, dict):
+        self.basePath = basePath
         self.data = dict
         
         # load poster pixmap
@@ -16,7 +18,11 @@ class MovieData:
             self.pixmap.loadFromData(byteArray)
         
         # load medium
-        self.media = self.libvlc.media_new(unicode(self.data["path"]))
+        path = self.data["path"]
+        head, tail = os.path.split(path)
+        if head=="":
+            path = os.path.join(self.basePath, tail)
+        self.media = self.libvlc.media_new(unicode(path))
         if self.data["loop"]:
             self.media.add_option("input-repeat=-1") # repeat
         

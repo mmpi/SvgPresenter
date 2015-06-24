@@ -17,6 +17,7 @@ class SvgPresentation:
     def __init__(self, svgPath):
         self.log = Log()
         self.svgPath = svgPath
+        self.baseFolderPath, svgFileName = os.path.split(svgPath)
         self.buffer = SvgPresentation.createBufferForSvgFile(svgPath)
         self.slideBuffer = self.buffer.subBuffer("slides")
         
@@ -163,6 +164,9 @@ class SvgPresentation:
     
     def numberOfSlides(self):
         return len(self.slides)
+
+    def moviePath(self):
+        return self.baseFolderPath
     
     def exportAsPdf(self, pdfPath=None):
         if pdfPath is None:
