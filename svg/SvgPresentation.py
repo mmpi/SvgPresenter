@@ -40,7 +40,8 @@ class SvgPresentation:
 
     def reset(self):
         self.slides = []
-        
+        self.pagecolor = None
+               
     def __iter__(self):
         return self.slides.__iter__()
     
@@ -78,7 +79,11 @@ class SvgPresentation:
             a = {}
             for key in CopyKeys:
                 a[key] = s.attrib[key]
+                if key=="pagecolor":
+                    self.pagecolor = a[key]
             s.attrib = a
+        if self.pagecolor is None:
+            self.pagecolor = "#ffffff"
 
         # show all layers
         for layer in layers:
@@ -124,7 +129,7 @@ class SvgPresentation:
 #             hash, dummy = self.plainSvgFiles.hashAndOutput(svgTree.tostring(svgTree.getroot(), encoding="utf8"))
             
             # new slide into presentation structure
-            slide = SvgSlide.createFromSvgRootElement(self.log.subLayer(), self.slideBuffer, newSvgRoot)
+            slide = SvgSlide.createFromSvgRootElement(self.log.subLayer(), self.slideBuffer, self.pagecolor, newSvgRoot)
             self.slides.append(slide)
         self.log.write("Done.")
         return True
@@ -136,8 +141,9 @@ class SvgPresentation:
         presentation = presentationTree.getroot()
         self.width = float(presentation.get("width"))
         self.height = float(presentation.get("height"))
+        self.pagecolor = presentation.get("pagecolor", "#ffffff")
         for e in presentation:
-            slide = SvgSlide.createFromPresentationXmlElement(self.slideBuffer, e)
+            slide = SvgSlide.createFromPresentationXmlElement(self.slideBuffer, self.pagecolor, e)
             self.slides.append(slide)
         print "Done."
         
@@ -146,6 +152,7 @@ class SvgPresentation:
         presentation = etree.Element("presentation")
         presentation.set("width", str(self.width))
         presentation.set("height", str(self.height))
+        presentation.set("pagecolor", self.pagecolor)
         for slide in self.slides:
             presentation.append(slide.createPresentationXmlElement())
         presentationTree = etree.ElementTree(presentation)

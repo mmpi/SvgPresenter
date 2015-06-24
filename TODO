@@ -1,0 +1,35 @@
+ ok:
+-----
+- reestablish function:
+    - provide... into SvgSlide
+    - preload... into SvgPresentation
+    - update interface classes
+- get correct movie sizes and positions using inkscape
+- pdf output
+- allow for svg display -> problems
+- allow for pdf display
+- fix buffer
+- check movie start
+- check scherenbild
+- buffered display
+- proper screen handling 
+ 
+ TODO:
+-------
+- how to well deal with appendix? (easy: switching audience display on/off + presenter same as audience)
+- script that takes movies to the current folder and changes the svg file accordingly; make sure that loading of the movies then also works from a different directory
+- tidy up pixmap buffer implementation: use base class for worker thread, every SlideArea has its own pixmap buffer with a different drawer thread class (e.g. presenters display uses simple raster)
+
+- inkscape extension: insert/modify movie
+- inkscape extension: to comfortably switch between slides (next, previous, first, last; more comfortable switcher with thumbnails to choose, thumbnails are buffered, maybe embedded in svg, per layer)
+- problem with buffer; try to get it newly whenever something is missing
+- embed movie in svg? how about using cElementTree if things become too slow?
+- inkscape extension: move all movies to integer positions -> evtl. Schnapsidee (movies innerhalb von Gruppen / transforms?)
+- playonclick functionality
+- presenters display with: time, loading type, buffer status
+- movie overlaps using QGraphicsScene/-view
+
+- check for double data in memory, on disk
+- Benutzung des Programms soll auch ohne libvlc möglich sein.
+- presentation extension for inkscape
+ 

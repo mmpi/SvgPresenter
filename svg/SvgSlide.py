@@ -7,12 +7,12 @@ from buffer.FileBuffer import FileBuffer
 
 from fileConverter.BufferedSvgToPng import BufferedSvgToPng
 from fileConverter.BufferedSvgToPdf import BufferedSvgToPdf
-from fileConverter.BufferedPdfToSvg import BufferedPdfToSvg
+from fileConverter.BufferedSvgToPlainSvg import BufferedSvgToPlainSvg
 
 class SvgSlide:
     @staticmethod
-    def createFromSvgRootElement(log, buffer, svgRoot):
-        slide = SvgSlide(log, buffer)
+    def createFromSvgRootElement(log, buffer, pagecolor, svgRoot):
+        slide = SvgSlide(log, buffer, pagecolor)
 
         data = etree.tostring(svgRoot, encoding='ascii')
         slide.hash = FileBuffer.hashFromData(data)
@@ -31,8 +31,8 @@ class SvgSlide:
         return slide
         
     @staticmethod
-    def createFromPresentationXmlElement(buffer, element):
-        slide = SvgSlide(Log(), buffer)
+    def createFromPresentationXmlElement(buffer, pagecolor, element):
+        slide = SvgSlide(Log(), buffer, pagecolor)
         slide.hash = element.attrib["hash"]
         xmlpath =  slide.xmlBuffer.useFileWithHash(slide.hash)
         if xmlpath is None:
@@ -47,8 +47,9 @@ class SvgSlide:
         slide.attrib["hash"] = self.hash
         return slide
 
-    def __init__(self, log, buffer):
+    def __init__(self, log, buffer, pagecolor):
         self.log = log
+        self.pagecolor = pagecolor
         
         # buffers
         self.buffer = buffer
@@ -60,7 +61,7 @@ class SvgSlide:
 
         # converters
         self.rawSvgToPdf = BufferedSvgToPdf(self.rawSvgBuffer, self.pdfBuffer)
-        self.pdfToSvg = BufferedPdfToSvg(self.pdfBuffer, self.svgBuffer)
+        self.rawSvgToPlainSvg = BufferedSvgToPlainSvg(self.rawSvgBuffer, self.svgBuffer)
         self.svgToPng = BufferedSvgToPng(self.rawSvgBuffer, self.pngBuffer)
         
         # the following will be set by the static factory functions
@@ -137,8 +138,7 @@ class SvgSlide:
         return self.rawSvgToPdf.convertForHash(self.hash, log)
 
     def provideSvgFile(self, log=None):
-        self.rawSvgToPdf.convertForHash(self.hash, log)
-        return self.pdfToSvg.convertForHash(self.hash, log)
+        return self.rawSvgToPlainSvg.convertForHash(self.hash, log)
 
     def provideRasterImage(self, log=None):
         return self.svgToPng.convertForHash(self.hash, log)

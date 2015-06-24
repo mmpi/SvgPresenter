@@ -1,0 +1,6 @@
+- python version?
+- PyQt4
+- inkscape
+- libvlc
+- pdftk
+- (popplerqt4 and pdftosvg)

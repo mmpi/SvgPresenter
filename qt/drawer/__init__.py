@@ -5,5 +5,5 @@ from SvgRasterDrawer import SvgRasterDrawer
 
 DrawerGenerators = {"raster": lambda slide, log: RasterImageDrawer(slide.provideRasterImage(log)),
                     "pdf":  lambda slide, log: PdfDrawer(slide.providePdfFile(log)),
-                    "svg":  lambda slide, log: SvgDrawer(slide.provideSvgFile(log)),
+                    "svg":  lambda slide, log: SvgDrawer(slide.pagecolor, slide.provideSvgFile(log)),
                     "svgRaster":  lambda slide, log: SvgRasterDrawer(slide, log),}

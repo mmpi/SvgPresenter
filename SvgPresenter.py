@@ -7,6 +7,9 @@ from qt.PresentationController import PresentationController
 from qt.AudienceDisplay import AudienceDisplay
 from qt.PresenterDisplay import PresenterDisplay
 
+# Mode = "svg"
+Mode = "svgRaster"
+
 if len(sys.argv)<2:
     print "Usage: SvgPresenter.py <svgfile>"
     print
@@ -22,9 +25,12 @@ else:
     # create pdf
 #     presentation.exportAsPdf()    
         
+    print "Using mode \"%s\"."%Mode
+    print
+    
     app = QtGui.QApplication(sys.argv)
     desktop = app.desktop()
-    pc = PresentationController(presentation, "svgRaster")
+    pc = PresentationController(presentation, Mode)
     pd = PresenterDisplay(desktop, pc)
     pd.show()
     ad = AudienceDisplay(desktop, pc)

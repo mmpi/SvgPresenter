@@ -1,3 +1,5 @@
+import os.path
+import shutil
 from svg.XmlNamespaces import etree, NSS
 
 MovieHrefKey = "{%s}moviehref"%NSS["svgpresenter"]
@@ -70,3 +72,71 @@ class DefsCollector:
                     sp = v.split("url(#")
                     for s in sp[1:]:
                         self.addRefid(s.split(")")[0])
+
+def fetchAllMovies(path, substitutions):
+    path = os.path.abspath(path)
+    print path
+    baseFolderPath, svgFileName = os.path.split(path)
+    baseFileName, extension = os.path.splitext(svgFileName)
+    
+    # copy failsafe
+    fsPathMask = os.path.join(baseFolderPath, baseFileName+"_failsafe%02d"+extension)
+    count = 1
+    while(os.path.isfile(fsPathMask%count)):
+        count += 1
+    print "Copy to %s..."%fsPathMask%count
+    shutil.copy(path, fsPathMask%count)
+    
+    # load original
+    print "Loading %s..."%svgFileName
+    file = open(path, 'r')
+    data = file.read()
+    file.close()
+    print "Parsing..." 
+    tree = etree.ElementTree(etree.fromstring(data))
+    data = None
+#     tree = etree.parse(path)
+    print "Done."
+    root = tree.getroot()
+
+    # look for movies
+    movieElements = root.findall(".//*[@%s]"%MovieHrefKey, NSS)
+    print "Found %d movies in %s."%(len(movieElements), svgFileName)
+    
+    # prepare substitutions
+    l = len(substitutions)/2
+    subst = dict(zip(substitutions[0:2*l-1:2],substitutions[1:2*l:2]))
+        
+    # copy movies and change paths    
+    for movie in movieElements:
+        mPath = movie.get(MovieHrefKey)
+        print "| Movie Path: %s"%mPath
+        if not mPath is None:
+            head, tail = os.path.split(mPath)
+            if head=="":
+                print "| | Not moving anything!"
+            else:
+                toPath = os.path.join(baseFolderPath, tail)
+                print "| | Copying movie to %s"%toPath
+                try:
+                    shutil.copy(mPath, toPath)
+                except:
+                    print "| | Failed!"
+                print "| | Changing path to %s"%tail
+                movie.set(MovieHrefKey, tail)
+            if tail in subst:
+                tail = subst[tail]
+                print "| | Substituting to %s"%tail
+                movie.set(MovieHrefKey, tail)
+            print "| Done."
+    print "Done."
+    
+    # saving svg file
+    print "Saving as %s..."%path
+    tree.write(path, encoding="UTF-8", xml_declaration=True)
+    print "Done."
+    
+                
+            
+            
+            

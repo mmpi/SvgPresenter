@@ -34,10 +34,12 @@ class MovieWidget(QtGui.QLabel):
     def updateGeometry(self, factor):
         self.setGeometry(self.data.scaledRectangle(factor))
         self.setPixmap(self.data.pixmap.scaled(self.size(), QtCore.Qt.KeepAspectRatio))
+        pass
 
     @vlc.callbackmethod
     def stopped(self, *args, **kwargs):
-#         print "Stopped: ", self.data["path"]
+#         print "Stopped."
+# #         print "Stopped: ", self.data["path"]
 #         self.close()
 #         print "trying to release player..."
 #         self.player.release()
