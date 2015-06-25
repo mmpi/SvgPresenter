@@ -1,11 +1,6 @@
 #!/usr/bin/env python
 import sys
-from PyQt4 import QtGui
-
 from svg.SvgPresentation import SvgPresentation
-from qt.PresentationController import PresentationController
-from qt.AudienceDisplay import AudienceDisplay
-from qt.PresenterDisplay import PresenterDisplay
 
 if len(sys.argv)<2:
     print "Usage: convertToPdf.py <svgfile>"

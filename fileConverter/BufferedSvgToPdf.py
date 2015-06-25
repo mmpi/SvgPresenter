@@ -11,6 +11,7 @@ class BufferedSvgToPdf(BufferedFileConverter):
         subprocess.check_output(["inkscape",
                                  "--without-gui",
                                  "--file="+fromPath,
+                                 "--export-area-page",
                                  "--export-text-to-path",
                                  "--export-pdf="+toPath,])
         return True
